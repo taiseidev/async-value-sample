@@ -35,39 +35,11 @@ class MyHomePage extends ConsumerWidget {
       appBar: AppBar(
         title: const Text('AsyncValue Sample'),
       ),
-      body: count.when(
+      body: count.whenOrNull(
         data: (data) {
-          // if (count.isLoading) {
-          //   return const Center(
-          //     child: Text('ロード中です'),
-          //   );
-          // }
-          if (count.isRefreshing) {
-            return const Center(
-              child: Text('リフレッシュ中です'),
-            );
-          }
-          return Center(
-            child: Text(
-              data.toString(),
-            ),
-          );
+          print(data);
+          return Text(data.toString());
         },
-        error: (error, stackTrace) {
-          if (count.isRefreshing) {
-            return const Center(
-              child: Text('リフレッシュ中です'),
-            );
-          }
-          return Center(
-            child: Text(
-              error.toString(),
-            ),
-          );
-        },
-        loading: () => const Center(
-          child: CircularProgressIndicator(),
-        ),
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () => ref.refresh(countProvider),
@@ -78,8 +50,57 @@ class MyHomePage extends ConsumerWidget {
   }
 }
 
+// class MyHomePage extends ConsumerWidget {
+//   const MyHomePage({super.key});
+
+//   @override
+//   Widget build(BuildContext context, WidgetRef ref) {
+//     final count = ref.watch(countProvider);
+//     print(count);
+//     return Scaffold(
+//       appBar: AppBar(
+//         title: const Text('AsyncValue Sample'),
+//       ),
+//       body: count.when(
+//         data: (data) {
+//           // if (count.isLoading) {
+//           //   return const Center(
+//           //     child: Text('ロード中です'),
+//           //   );
+//           // }
+//           if (count.isRefreshing) {
+//             return const Center(
+//               child: Text('リフレッシュ中です'),
+//             );
+//           }
+
+//           return Center(
+//             child: Text(
+//               data.toString(),
+//             ),
+//           );
+//         },
+//         error: (error, stackTrace) {
+//           return Center(
+//             child: Text(
+//               error.toString(),
+//             ),
+//           );
+//         },
+//         loading: () => const Center(
+//           child: CircularProgressIndicator(),
+//         ),
+//       ),
+//       floatingActionButton: FloatingActionButton(
+//         onPressed: () => ref.refresh(countProvider),
+//         tooltip: 'Increment',
+//         child: const Icon(Icons.add),
+//       ),
+//     );
+//   }
+// }
+
 final countProvider = FutureProvider<int>((ref) async {
   await Future.delayed(const Duration(seconds: 3));
-  throw Exception('エラーが発生しました😳');
   return 1;
 });
