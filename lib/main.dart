@@ -19,54 +19,67 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
+      home: const MyHomePage(),
     );
   }
 }
 
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key, required this.title});
-
-  final String title;
+class MyHomePage extends ConsumerWidget {
+  const MyHomePage({super.key});
 
   @override
-  State<MyHomePage> createState() => _MyHomePageState();
-}
-
-class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
-
-  void _incrementCounter() {
-    setState(() {
-      _counter++;
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final count = ref.watch(countProvider);
+    print(count);
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.title),
+        title: const Text('AsyncValue Sample'),
       ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            const Text(
-              'You have pushed the button this many times:',
+      body: count.when(
+        data: (data) {
+          // if (count.isLoading) {
+          //   return const Center(
+          //     child: Text('ロード中です'),
+          //   );
+          // }
+          if (count.isRefreshing) {
+            return const Center(
+              child: Text('リフレッシュ中です'),
+            );
+          }
+          return Center(
+            child: Text(
+              data.toString(),
             ),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headline4,
+          );
+        },
+        error: (error, stackTrace) {
+          if (count.isRefreshing) {
+            return const Center(
+              child: Text('リフレッシュ中です'),
+            );
+          }
+          return Center(
+            child: Text(
+              error.toString(),
             ),
-          ],
+          );
+        },
+        loading: () => const Center(
+          child: CircularProgressIndicator(),
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
+        onPressed: () => ref.refresh(countProvider),
         tooltip: 'Increment',
         child: const Icon(Icons.add),
       ),
     );
   }
 }
+
+final countProvider = FutureProvider<int>((ref) async {
+  await Future.delayed(const Duration(seconds: 3));
+  throw Exception('エラーが発生しました😳');
+  return 1;
+});
